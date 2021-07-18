@@ -1,6 +1,7 @@
 /*
 发财大赢家助力
 更新时间：2021-7-15
+export dyjHelpPins=""
 0 0 * * * https://raw.githubusercontent.com/cdle/jd_study/main/jd_dyj_help.js
 */
 const $ = new Env("发财大赢家助力")
