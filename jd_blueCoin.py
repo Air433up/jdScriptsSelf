@@ -20,7 +20,7 @@ coinToBeans = '超值京豆包'
 #多账号并发，默认关闭 ENV设置开启： export blueCoin_Cc=True
 blueCoin_Cc = False
 #单击次数
-dd_thread = 15
+dd_thread = 5
 ###############################################
 
 import time, datetime, os, sys, random
