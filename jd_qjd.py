@@ -21,7 +21,12 @@ update: 2021.7.22 16:55
 cookies = ''
 qjd_zlzh = ['wdmfXJIJXsHPlz','jd_796354781d936','%E5%A9%A7%E8%A1%A31991',
 'jd_BCbGVAMpFXCo','jd_73c0c5563c0bb','jd_66296a2351681','wdDmZTgPhuJYOB',
-'jd_PWDOzwcSyHuJ','jd_yLHRhXQlyLTC','jd_43d8e063146ca'
+'jd_PWDOzwcSyHuJ','jd_yLHRhXQlyLTC','jd_43d8e063146ca','jd_69cca70e4e0b1',
+'jd_hYbQITDXbgxT','jd_554e382ea2508','jd_74f9dc5247c14','jd_5ffa030f85983',
+'jd_6f27491586ecc','jd_TffXdoizbnze','jd_4cf69d5ad403d','jd_pJWcxopSuUlu',
+'jd_486461048e149','jd_66148b015f266','291184158_m','jd_7677dbdd25a08',
+'gxx138323','jd_jYSpHBGmlTqZ','15612100157_p','jd_qAjErqrZHKyC',
+'jd_7798528fc4e6c','jd_6be9800bfb2aa'
 ]
 
 # Env环境设置 通知服务
