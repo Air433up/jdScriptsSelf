@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*
 '''
+1 0 * * * jd_qjd.py
 项目名称: JD-Script / jd_qjd
 Author: Curtin
 功能：全民抢京豆（7.22-7.31）：https://h5.m.jd.com/rn/3MQXMdRUTeat9xqBSZDSCCAE9Eqz/index.html?has_native=0
@@ -18,7 +19,7 @@ update: 2021.7.22 16:55
 #exit(0)
 #ck 优先读取【JDCookies.txt】 文件内的ck  再到 ENV的 变量 JD_COOKIE='ck1&ck2' 最后才到脚本内 cookies=ck
 cookies = ''
-qjd_zlzh = ['wdmfXJIJXsHPlz', 'jd_wgjULwvBwsks','jd_796354781d936','%E5%A9%A7%E8%A1%A31991',
+qjd_zlzh = ['wdmfXJIJXsHPlz','jd_796354781d936','%E5%A9%A7%E8%A1%A31991',
 'jd_BCbGVAMpFXCo','jd_73c0c5563c0bb','jd_66296a2351681','wdDmZTgPhuJYOB',
 'jd_PWDOzwcSyHuJ','jd_yLHRhXQlyLTC','jd_43d8e063146ca'
 ]
