@@ -18,7 +18,7 @@ update: 2021.7.22 16:55
 #exit(0)
 #ck 优先读取【JDCookies.txt】 文件内的ck  再到 ENV的 变量 JD_COOKIE='ck1&ck2' 最后才到脚本内 cookies=ck
 cookies = ''
-qjd_zlzh = ['wdmfXJIJXsHPlz', 'jd_wgjULwvBwsks','jd_796354781d936','%E5%A9%A7%E8%A1%A31991','jd_BCbGVAMpFXCo','jd_73c0c5563c0bb']
+qjd_zlzh = ['wdmfXJIJXsHPlz', 'jd_wgjULwvBwsks','jd_796354781d936','%E5%A9%A7%E8%A1%A31991','jd_BCbGVAMpFXCo','jd_73c0c5563c0bb','jd_66296a2351681']
 
 # Env环境设置 通知服务
 # export BARK=''                   # bark服务,苹果商店自行搜索;
