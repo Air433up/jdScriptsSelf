@@ -1,7 +1,7 @@
 /*
 真·抢京豆
 更新时间：2021-7-24
-备注：高速并发抢京豆，专治偷助力。设置环境变量angryBeanPins为指定账号助力，默认不助力。环境变量angryBeanMode可选值priority和speed，默认speed模式。
+备注：高速并发抢京豆，专治偷助力。设置环境变量angryBeanPins为指定账号助力，默认不助力。环境变量angryBeanMode可选值priority和speed，默认speed模式。默认推送通知，如要屏蔽通知需将环境变量enableAngryBeanNotify的值设为false。
 TG学习交流群：https://t.me/cdles
 0 0 * * * https://raw.githubusercontent.com/cdle/jd_study/main/jd_angryBean.js
 */
@@ -34,42 +34,65 @@ var mode = $.isNode() ? (process.env.angryBeanMode ? process.env.angryBeanMode :
                times: 0,
                timeout: 0,
           }
-          if (!$.isNode() || pins.indexOf(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]) != -1) {
-               await requestApi('signGroupHit', cookie, {
+          var address = pins.indexOf(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+          if (!$.isNode() || address != -1) {
+               var data = await requestApi('signGroupHit', cookie, {
                     activeType: 2
                });
-               var data = await requestApi('signBeanGroupStageIndex', cookie, {
-                    rnVersion: "3.9",
-                    fp: "-1",
-                    shshshfp: "-1",
-                    shshshfpa: "-1",
-                    referUrl: "-1",
-                    userAgent: "-1",
-                    jda: "-1",
-                    monitor_source: "bean_m_bean_index"
-               });
-               if (data && data.data && data.data.shareCode) {
-                    console.log(`${Number(i)+1} 可以被助力`)
-                    helps.push({
-                         id: i,
-                         cookie: cookie,
-                         groupCode: data.data.groupCode,
-                         shareCode: data.data.shareCode,
-                         activityId: data.data.activityMsg.activityId,
-                         success: false,
-                    })
-                    tool.helps.add(i)
-                    init.push(i)
+               if (data && data.data && data.data.respCode) {
+                    if (data.data.respCode != "SG100") {
+                         data = await getTuanInfo(cookie)
+                         if (data && data.data && data.data.shareCode) {
+                              console.log(`账号${toChinesNum(i+1)}，准备抢京豆`)
+                              helps.push({
+                                   id: i,
+                                   cookie: cookie,
+                                   groupCode: data.data.groupCode,
+                                   shareCode: data.data.shareCode,
+                                   activityId: data.data.activityMsg.activityId,
+                                   success: false,
+                                   address: address,
+                              })
+                              tool.helps.add(i)
+                              init.push(i)
+                         } else {
+                              console.log(`账号${toChinesNum(i+1)}，异常`)
+                         }
+                    } else {
+                         console.log(`账号${toChinesNum(i+1)}是黑号，快去怼客服吧`)
+                    }
                } else {
-                    console.log(`${Number(i)+1} 不可以被助力`)
+                    console.log(`账号${toChinesNum(i+1)}，登录信息过期了`)
                }
+
           }
           tools.push(tool)
      }
+     helps.sort((i, j) => {
+          return i.address > j.address ? 1 : -1
+     })
      for (let help of helps)
-     await open(help)
+          await open(help)
      while (finished.size != init.length)
-     await $.wait(100)
+          await $.wait(100)
+     var beanCount = 0
+     var msg = ""
+     for (let help of helps) {
+          data = await getTuanInfo(help.cookie)
+          if (data) {
+               var sumBeanNum = +data.data.sumBeanNumStr
+               beanCount += sumBeanNum
+               out = `账号${toChinesNum(help.id+1)}，已抢京豆：${sumBeanNum}`
+               console.log(out)
+               msg += out + "\n"
+          }
+     }
+     out = `今日累计获得${beanCount}京豆`
+     console.log(out)
+     msg += out + "\n"
+     if (($.isNode() ? (process.env.enableAngryBeanNotify == "false" ? "false" : "true") : "false") == "true") {
+          require('./sendNotify').sendNotify(`真·抢京豆`, msg);
+     }
 })().catch((e) => {
           $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
      })
@@ -77,16 +100,30 @@ var mode = $.isNode() ? (process.env.angryBeanMode ? process.env.angryBeanMode :
           $.done();
      })
 
+async function getTuanInfo(cookie) {
+     return await requestApi('signBeanGroupStageIndex', cookie, {
+          rnVersion: "3.9",
+          fp: "-1",
+          shshshfp: "-1",
+          shshshfpa: "-1",
+          referUrl: "-1",
+          userAgent: "-1",
+          jda: "-1",
+          monitor_source: "bean_m_bean_index"
+     });
+}
+
 async function open(help) {
      var tool = tools.pop()
      if (!tool) {
           finished.add(help.id)
           return
      }
+     tool.timeout++
      ecpt = new Set(tool.helps, finished)
      diff = new Set(init.filter(hid => !ecpt.has(hid)))
      if (diff.size == 0 || tool.helps.has(help.id)) {
-          if (diff.size != 0) {
+          if (diff.size != 0 && tool.timeout < 10) {
                tools.unshift(tool)
           }
           if (mode != speed) {
@@ -101,7 +138,6 @@ async function open(help) {
           if (data && data.data && data.data.helpToast) {
                helpToast = data.data.helpToast
           }
-          tool.timeout++
           if (helpToast) {
                console.log(`${tool.id+1}->${help.id+1} ${helpToast}`)
                if (helpToast.indexOf("助力成功") != -1) { //助力成功
@@ -116,17 +152,11 @@ async function open(help) {
                if (helpToast.indexOf("火爆") != -1) { //活动太火爆啦~请稍后再试~
                     tool.times = maxTimes
                }
-               if (mode == "speed") {
-                    if (tool.timeout >= helps.length * 2) {
-                         tool.times = maxTimes
-                    }
-               }
                if (tool.times < maxTimes) {
                     tools.unshift(tool)
                }
           }
           tool.helps.add(help.id)
-       
           if (!help.success) {
                await open(help)
           } else {
@@ -141,7 +171,6 @@ async function open(help) {
           source: "guest",
      }
      if (mode != "speed") {
-
           data = await requestApi('signGroupHelp', tool.cookie, params)
           await handle(data)
      } else {
@@ -149,7 +178,7 @@ async function open(help) {
      }
 }
 
-function requestApi(functionId, cookie, body = {}) {
+function requestApi(functionId, cookie, body = {}, time = 0) {
      var url = `https://api.m.jd.com/client.action?functionId=${functionId}&body=${JSON.stringify(body)}&appid=ld&client=apple&clientVersion=10.0.4&networkType=wifi&osVersion=13.7&uuid=&openudid=`
      return new Promise(resolve => {
           $.get({
@@ -165,20 +194,45 @@ function requestApi(functionId, cookie, body = {}) {
                     "User-Agent": ua,
                     "Host": "api.m.jd.com",
                },
-               timeout: 1000,
+               timeout: 2500,
           }, (_, resp, data) => {
                if (data) {
                     resolve(JSON.parse(data))
                } else {
-                    resolve(0)
+                    if (time == 5) {
+                         resolve(0)
+                    } else {
+                         requestApi(functionId, cookie, body, time + 1).then(function (data) {
+                              resolve(data)
+                         })
+                    }
                }
           })
      })
 }
 
+let toChinesNum = (num) => {
+     let changeNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+     let unit = ["", "十", "百", "千", "万"];
+     num = parseInt(num);
+     let getWan = (temp) => {
+          let strArr = temp.toString().split("").reverse();
+          let newNum = "";
+          for (var i = 0; i < strArr.length; i++) {
+               newNum = (i == 0 && strArr[i] == 0 ? "" : (i > 0 && strArr[i] == 0 && strArr[i - 1] == 0 ? "" : changeNum[strArr[i]] + (strArr[i] == 0 ? unit[0] : unit[i]))) + newNum;
+          }
+          return newNum;
+     }
+     let overWan = Math.floor(num / 10000);
+     let noWan = num % 10000;
+     if (noWan.toString().length < 4) {
+          noWan = "0" + noWan;
+     }
+     return overWan ? getWan(overWan) + "万" + getWan(noWan) : getWan(num);
+}
+
 function requireConfig() {
      return new Promise(resolve => {
-          notify = $.isNode() ? require('./sendNotify') : '';
           const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
           if ($.isNode()) {
                Object.keys(jdCookieNode).forEach((item) => {
