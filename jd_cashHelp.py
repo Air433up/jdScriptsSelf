@@ -16,6 +16,7 @@ cookies = ''
 # 设置被助力的账号可填用户名 或 pin的值不要; env 设置 export cash_zlzh="用户1&用户N"
 cash_zlzh = ['wdmfXJIJXsHPlz', 'jd_796354781d936', '%E5%A9%A7%E8%A1%A31991', 'jd_wgjULwvBwsks', 'jd_4e7993b3a597b', 'jd_RsjcJIDNwDpf']
 
+
 # Env环境设置 通知服务
 # export BARK=''                   # bark服务,苹果商店自行搜索;
 # export SCKEY=''                  # Server酱的SCKEY;
