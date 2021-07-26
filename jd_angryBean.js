@@ -1,13 +1,14 @@
 /*
 真·抢京豆
-更新时间：2021-7-24
-备注：高速并发抢京豆，专治偷助力。设置环境变量angryBeanPins为指定账号助力，默认不助力。环境变量angryBeanMode可选值priority和speed，默认speed模式。默认推送通知，如要屏蔽通知需将环境变量enableAngryBeanNotify的值设为false。
+更新时间：2021-7-25
+备注：高速并发抢京豆，专治偷助力。设置环境变量angryBeanPins为指定账号助力，默认不助力。环境变量angryBeanMode可选值priority(优先模式)、smart(智能模式)和speed(极速模式)，默认speed模式。默认推送通知，如要屏蔽通知需将环境变量enableAngryBeanNotify的值设为false。
 TG学习交流群：https://t.me/cdles
 0 0 * * * https://raw.githubusercontent.com/cdle/jd_study/main/jd_angryBean.js
 */
 const $ = new Env("真·抢京豆")
 const ua = `jdltapp;iPhone;3.1.0;${Math.ceil(Math.random()*4+10)}.${Math.ceil(Math.random()*4)};${randomString(40)}`
 const speed = "speed"
+const smart = "smart"
 var pins = $.isNode() ? (process.env.angryBeanPins ? process.env.angryBeanPins : "") : "";
 let cookiesArr = [];
 var helps = [];
@@ -44,7 +45,7 @@ var mode = $.isNode() ? (process.env.angryBeanMode ? process.env.angryBeanMode :
                          data = await getTuanInfo(cookie)
                          if (data && data.data && data.data.shareCode) {
                               console.log(`账号${toChinesNum(i+1)}，准备抢京豆`)
-                              helps.push({
+                              var help = {
                                    id: i,
                                    cookie: cookie,
                                    groupCode: data.data.groupCode,
@@ -52,8 +53,12 @@ var mode = $.isNode() ? (process.env.angryBeanMode ? process.env.angryBeanMode :
                                    activityId: data.data.activityMsg.activityId,
                                    success: false,
                                    address: address,
-                              })
-                              tool.helps.add(i)
+                                   notYet: data.data.beanCountProgress.progressNotYet,
+                              }
+                              helps.push(help)
+                              if (mode == speed) {
+                                   tool.helps.add(i)
+                              }
                               init.push(i)
                          } else {
                               console.log(`账号${toChinesNum(i+1)}，异常`)
@@ -71,10 +76,24 @@ var mode = $.isNode() ? (process.env.angryBeanMode ? process.env.angryBeanMode :
      helps.sort((i, j) => {
           return i.address > j.address ? 1 : -1
      })
-     for (let help of helps)
-          await open(help)
-     while (finished.size != init.length)
-          await $.wait(100)
+     for (var k = 0; k < (mode == smart ? 50 : 1); k++) {
+          for (let help of helps) {
+               if (k != 0) {
+                    if (help.success) break
+                    cookie = help.cookie
+                    data = await getTuanInfo(cookie)
+                    if (data && data.data && data.data.shareCode) {
+                         help.notYet = data.data.beanCountProgress.progressNotYet
+                    }
+                    if (!help.notYet) break
+               }
+               await open(help)
+          }
+     }
+     if (mode == speed) {
+          while (finished.size != init.length)
+               await $.wait(100)
+     }
      var beanCount = 0
      var msg = ""
      for (let help of helps) {
@@ -119,29 +138,50 @@ async function open(help) {
           finished.add(help.id)
           return
      }
-     tool.timeout++
-     ecpt = new Set(tool.helps, finished)
-     diff = new Set(init.filter(hid => !ecpt.has(hid)))
-     if (diff.size == 0 || tool.helps.has(help.id)) {
-          if (diff.size != 0 && tool.timeout < 10) {
-               tools.unshift(tool)
-          }
-          if (mode != speed) {
-               await open(help)
-          } else {
-               open(help)
-          }
+     if (mode == smart && !help.notYet) {
           return
+     }
+     if (mode == speed) {
+          tool.timeout++
+          ecpt = new Set(tool.helps, finished)
+          diff = new Set(init.filter(hid => !ecpt.has(hid)))
+          if (tool.timeout > maxTimes * 2) { //超时处理
+               open(help)
+               return
+          }
+          if (diff.size == 0) { //助力完成
+               open(help)
+               return
+          } else {
+               if (tool.helps.has(help.id)) { //阻止自己给自己助力
+                    tools.unshift(tool)
+                    open(help)
+                    return
+               }
+               //ok
+          }
+     } else {
+          if (tool.helps.has(help.id)) {
+               tool.helps.add(help.id)
+               tools.unshift(tool)
+               finished.add(help.id)
+               return
+          }
+          if (tool.id == help.id) {
+               tool.helps.add(help.id)
+               tools.unshift(tool)
+               await open(help)
+               return
+          }
      }
      async function handle(data) {
           var helpToast = undefined
           if (data && data.data && data.data.helpToast) {
+               tool.helps.add(help.id)
                helpToast = data.data.helpToast
-          }
-          if (helpToast) {
-               console.log(`${tool.id+1}->${help.id+1} ${helpToast}`)
                if (helpToast.indexOf("助力成功") != -1) { //助力成功
                     tool.times++
+                    help.notYet--
                }
                if (helpToast.indexOf("满") != -1) { //该团已经满啦~去帮别人助力吧~
                     help.success = true
@@ -155,8 +195,15 @@ async function open(help) {
                if (tool.times < maxTimes) {
                     tools.unshift(tool)
                }
+          } else {
+               if (data && data.errorMessage == "用户未登录") {
+                    helpToast = "用户未登录"
+               } else {
+                    tools.unshift(tool)
+                    helpToast = "异常"
+               }
           }
-          tool.helps.add(help.id)
+          console.log(`${tool.id+1}->${help.id+1} ${helpToast}`)
           if (!help.success) {
                await open(help)
           } else {
@@ -197,7 +244,8 @@ function requestApi(functionId, cookie, body = {}, time = 0) {
                timeout: 2500,
           }, (_, resp, data) => {
                if (data) {
-                    resolve(JSON.parse(data))
+                    data = JSON.parse(data)
+                    resolve(data)
                } else {
                     if (time == 5) {
                          resolve(0)
