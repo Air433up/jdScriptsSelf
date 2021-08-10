@@ -55,8 +55,6 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
      
       await $.wait(2000)
       await tythelp()
-     
-      
 
     }
   }
