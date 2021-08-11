@@ -1,7 +1,6 @@
 /*
 发财大赢家助力
 更新时间：2021-7-15
-export dyjHelpPins=""
 0 0 * * * https://raw.githubusercontent.com/cdle/jd_study/main/jd_dyj_help.js
 */
 const $ = new Env("发财大赢家助力")
@@ -27,7 +26,7 @@ let tools = []
           cookie = cookiesArr[i];
           pin = cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1]
           if(pins && pins.indexOf(pin)!=-1){
-               data = await openRedEnvelopeInteract()
+               data = await openRedEnvelopeInteract({}, cookie)
                if(data?.code==16020)continue
                data = await redEnvelopeInteractHome()
                redEnvelopeId = data?.data?.redEnvelopeId
