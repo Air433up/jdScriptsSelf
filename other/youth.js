@@ -1,9 +1,10 @@
 /*
-更新时间: 2021-03-13 16:20
+更新时间: 2021-08-12 16:10
 赞赏:中青邀请码`57084952`, 万分感谢
 本脚本仅适用于中青看点极速版领取青豆
+支持青龙2.8
 
-
+0 4-20/2 * * *	youth.js
 */
 
 const $ = new Env("中青看点");
@@ -20,11 +21,11 @@ let cardTime = $.getdata('zqtime') || "05"; //打卡时间
 let readtimes = 0;
 
 // 需获取部分
-let withdrawUrl = $.getdata('cashurl_zq'); //提现地址，可选
-let withdrawBody = $.getdata('cashbody_zq'); //提现请求，可选
-let cookieYouth = $.getdata('youthheader_zq');
-let artBody = $.getdata('read_zq');
-let readTimes = $.getdata('readtime_zq');
+let withdrawUrl = $.getdata('cashurl_zq') || process.env.cashurl_zq; //提现地址，可选
+let withdrawBody = $.getdata('cashbody_zq') || process.env.cashbody_zq; //提现请求，可选
+let cookieYouth = $.getdata('youthheader_zq') || process.env.youthheader_zq;
+let artBody = $.getdata('read_zq') || process.env.read_zq;
+let readTimes = $.getdata('readtime_zq') || process.env.readtime_zq;
 
 //声明部分
 let rotaryscore = 0,doublerotary = 0;
