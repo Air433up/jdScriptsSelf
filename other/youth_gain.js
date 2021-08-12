@@ -13,6 +13,10 @@ https:\/\/kandian\.wkandian\.com\/v5\/Nameless\/adlickstart\.json url script-req
 
 多个请求体时用'&'号或者换行隔开"，本脚本可自动删除失效请求，请须知 ‼️
 
+支持青龙2.8
+
+10 8-18/2 * * *   youth_gain.js
+
 */
 
 
@@ -21,8 +25,8 @@ const $ = new Env("中青看点浏览赚&看看赚")
 let startArr = [], lookArr=[];
 let gainscore = 0, lookscore = 0;
 let StartBody = [],LookBody = [];
-let startbodys = $.getdata('youth_start');
-let lookbodys = $.getdata('youth_look')
+let startbodys = $.getdata('youth_start') || process.env.youth_start;
+let lookbodys = $.getdata('youth_look') || process.env.youth_look;
 
 if (isGetCookie = typeof $request !==`undefined`) {
    GetCookie();
