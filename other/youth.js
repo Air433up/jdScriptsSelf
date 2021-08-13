@@ -1,10 +1,10 @@
 /*
-更新时间: 2021-08-12 16:10
-赞赏:中青邀请码`57084952`, 万分感谢
+更新时间: 2021-03-13 16:20
+赞赏:中青邀请码`46308484`,农妇山泉 -> 有点咸，万分感谢
 本脚本仅适用于中青看点极速版领取青豆
-支持青龙2.8
+食用说明请查看本仓库目录Taskconf/youth/readme.md，其中打卡挑战赛可通过Boxjs开关，报名时间为23点，早起打卡时间为早5点，报名需1000青豆押金，打卡成功可返1000+青豆，打卡失败则押金不予返还，请注意时间运行，
+转发文章获得青豆不实，请无视
 
-0 4-20/2 * * *	youth.js
 */
 
 const $ = new Env("中青看点");
@@ -13,19 +13,19 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //const youthNode = $.isNode() ? require('./youth_env') : '';
 
 // 可设置部分
-let notifyInterval = $.getdata("notifytimes") || 0; //通知间隔，默认抽奖每50次通知一次，如需关闭全部通知请设为0
-let ONCard = $.getdata('zqcard') || "true"; //早起打卡开关
+let notifyInterval = $.getdata("notifytimes") || 50; //通知间隔，默认抽奖每50次通知一次，如需关闭全部通知请设为0
+let ONCard = $.getdata('zqcard') || "false"; //早起打卡开关
 let s = $.getdata('delay_rotary_zq') || "10"; //转盘延迟时间
-let withdrawcash = $.getdata('zqcash') || 10; //提现金额
+let withdrawcash = $.getdata('zqcash') || 30; //提现金额
 let cardTime = $.getdata('zqtime') || "05"; //打卡时间
 let readtimes = 0;
 
 // 需获取部分
 let withdrawUrl = $.getdata('cashurl_zq'); //提现地址，可选
 let withdrawBody = $.getdata('cashbody_zq'); //提现请求，可选
-let cookieYouth = "&uid=57084952&cookie=MDAwMDAwMDAwMJCMpN-w09Wtg5-Bb36eh6CPqHualq2jmrCarWOx3XVthXygl67OqmqXr6NthJl7mI-shMmXeqDau4StacS3o7GFon6Yrqm6qoF5m7GEY2Ft&cookie_id=81a9fe6a6744d2f46973b493d9c05797";
-let artBody = "p=9NwGV8Ov71o%3DgW5NEpb6rjab0hHSxXenkWHSkCwB26b0x_gtnWSAWxe4W5DsfKJWZO6VYju6yXI_uSm7KzXcttEEfVcaey0QuU5f9sIQ566P0XVw6jsX8RA0kQDDiidqIKF4BFzBIz0EW8nvNO-KPHiZmd_IcsDMMynkye_7VuMU-Drfj6Z6tNaq3JBQXaY7wfPGq7Drw6W3DMkhXZjWFpytzpBaA6e5UNI4uXZlWSGTamCO3q01M6yfza4TwkIRIL7J8cCPM1t_41FMhZeBU8BbTDzaTyEWGyt6JZzoduePoCcG8LPl_f4LNMwVbOt092befKWwsVOLJAXRnhOXB15PFKIatzk-Zomu0YrDpleEH5RCtZVMeYDud-VCYuNt6QJ2WONvT7ES6gIHRCOfV9yQVPT24CyECfpPr4_pkGFpTmRKKqCqXQXLXHB84CtkYnbRFc-5_9XmRrEW45WYXYjaYOzebgIVOj-Vf8b6j1uzKWyNI39mV4VDlrVAJOF5_JMKUXSunZ9geykUU1hlv7KowiD0Xpkdk-vlzshCiPTWXtCZL8dOAS3GCZ1F0mYWpzeESiKov7Wyz7tSOytYosQfthwauUxZv5fuyGDMYI3Hl8tz8H5BjyEgDyXzQxw5yXQxEagkEaFTqIkMBUfhyflOwFDacLxAKNFUfQH7PIiCyeCXdYpCr7uazjyZ5fSqne1iHpA_5ZOC4I8xKRG-QmngxHLjB4t5TnYCvmvBuGYAnRXyr2mmsBUXxIwz_4NGgpUTU39trrA62mKxNsREhCtZE5HyV8zJSvNyncCg5uK1bwyWfspo_XLgCknDsI115Byp_hu5KuFeAVABTnY-sctqfyxWUi-p53oFjHyWcpkkOG8_2YVtmsJYYPq-ipBO5DViebcjxTKX";
-let readTimes = "p=9NwGV8Ov71o%3DgW5NEpb6rjb84bkaCQyOq-myT0C-Ktb_mEtDEGsOrBruuZzIpWlevTEf2n4e6SDtwtHI8jh7tGLFm1iscPtbZwlhO1--2rPMqEVay5SHQZ0Xa5om9y_QnFioIoDSg-ArtrfwznZt1IhRAOspLNm4F1Z4mRILDUTDM9AS-u45jBBq1Kp9CeHLB38CxZ_7m390mjwDIx66wI-E95VNrQYGl4f6dzBQIhkdQH2UznlbXPfrg4HXp_dPyf8pOMkS8oEoA9K7jH3Kd-5GdD9aE6zHfXJYI3nUZJSNV1-fafYwld9YGdr9G4rbCJv7IR1eAyOpK-A4f1TU0NAAOzAIp_buyU69yReDy9mDIZPJRh_7hhn50KsKYGYKlh3FX2rYiVLlnHF-MDeOxp6CfjEuGkcVHx_UtIgrS8tySHhvM4wfhMEes_-gcGWPVoKIQNBVUrtqb1Unr0xBe_opg21NT2dM65n3DQiH_WmK4yE7M_wmDYdKm2ZFKUaAtKodyghw7kcFfwquddUZw6ZQNuv-vTnT_0OQjoP7K36yZH9g3Wihsp-LZ--7HPGj7hMvgQ_mYIRudIK9YdeSdRcUstnQ0MyxmlbTQ9tP4CVHILdrpJum3KoVgyQrE0dFULA1GiJvmYy4Hh8HfGMW9o5jcukGxpz36ku3EpaF8Stp8pPN2bZ7DC8hm-4je5dGJSswK9v_YyAsJqJXfKj4K4g7Y1oVHLsIuwHa67T2QdoVbI2Yzdw-ZK1PGHHQjkQPHD-nFv4O8YoEP6hnbThkTWJqU32fTyQYivoTxgX8nhdquwz2SuJubJ37cDPwjeW3pxWl7gkRImA4XhQylipi-RE%3D";
+let cookieYouth = $.getdata('youthheader_zq');
+let artBody = $.getdata('read_zq');
+let readTimes = $.getdata('readtime_zq');
 
 //声明部分
 let rotaryscore = 0,doublerotary = 0;

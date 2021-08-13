@@ -1,21 +1,18 @@
 /*
 更新时间: 2021-05-22 22:10
 
-点击几篇文章和视频，自动获取阅读请求，在Github Actions中的Secrets新建name为'YOUTH_READ'的一个值，拷贝抓包的请求体到下面Value的文本框中，添加的请求体越多，获得青豆次数越多
+点击几篇文章和视频，自动获取阅读请求，在Github Actions中的Secrets新建name为'YOUTH_READ'的一个值，拷贝抓包的请求体到下面Value的文本框中，添加的请求体越多，获得青豆次数越多，本脚本不包含任何推送通知
 
 多个请求体时用'&'号或者换行隔开" ‼️
 
-支持青龙2.8
-
-20 6-18/2 * * *   youth_Read.js
 */
 
 const $ = new Env("中青看点阅读")
 //const notify = $.isNode() ? require('./sendNotify') : '';
 let ReadArr = [], timebodyVal ="";
-let YouthBody = $.getdata('youth_autoread')||$.getdata("zqgetbody_body")||process.env.youth_autoread;
-let smallzq = $.getdata('youth_cut')||process.env.youth_cut;
-let indexLast = $.getdata('zqbody_index')||process.env.zqbody_index;
+let YouthBody = $.getdata('youth_autoread')||$.getdata("zqgetbody_body");
+let smallzq = $.getdata('youth_cut');
+let indexLast = $.getdata('zqbody_index');
 let artsnum = 0, videosnum = 0;
 let videoscore = 0,readscore = 0;
 let artArr = [], delbody = 0;
@@ -162,7 +159,7 @@ function AutoRead() {
                         if ($.isNode() && process.env.YOUTH_ATIME) {
                             timebodyVal = process.env.YOUTH_ATIME;
                         } else {
-                            timebodyVal = $.getdata('autotime_zq')||process.env.autotime_zq;
+                            timebodyVal = $.getdata('autotime_zq');
                         }
                         await readTime()
                     };
