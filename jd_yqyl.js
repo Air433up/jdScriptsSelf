@@ -4,7 +4,7 @@
 export yqm="你的邀请码"
 #柠檬邀请有礼
 [task_local]
-0 10 * * * http://nm66.top/jd_yqyl.js, tag=柠檬邀请有礼, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true
+0 9 * * * http://nm66.top/jd_yqyl.js, tag=柠檬邀请有礼, img-url=https://raw.githubusercontent.com/Orz-3/mini/master/Color/jd.png, enabled=true
 */
 const $ = new Env('柠檬邀请有礼');
 const notify = $.isNode() ? require('./sendNotify') : '';
@@ -94,14 +94,17 @@ headers: {
                     data = JSON.parse(data);
 
                     //console.log(data)
-                    
+                    if(data.data.inviteStatus){
                     if(data.data.inviteStatus == 1){
                       console.log(data.data.inviteStatus+"邀请成功")
 
                 }else  if(data.data.inviteStatus == 0){
                 
-                    console.log(data.data.inviteStatus+"邀请失败")}
-            } catch (e) {
+                    console.log(data.data.inviteStatus+"邀请失败,已经被人轮了")}
+                    else if(data.data.inviteStatus == 2){
+                        console.log(data.data.inviteStatus+"邀请失败,已经被人轮了")
+                    }
+            }} catch (e) {
                 $.logErr(e, resp);
             } finally {
                 resolve();
@@ -116,7 +119,7 @@ headers: {
     return new Promise(async (resolve) => {
 
                 let options = {
-    url: `functionId=InviteFriendApiService&body={"method":"changeWxHongBao","data":{"order":3,"channel":1,"token":"","s":""}}&referer=-1&eid=eidIc2ff812158s1ARLLPvIBQjyII7trmiE3BQESzLTXqSC9s3TX28oQv3zQuaY%2B15FedjhWtgYfTsUSkl9FEDNBP8LQRrRx5GwEA93H4jSPYNJ1OvNs&aid=&client=ios&clientVersion=14.3&networkType=wifi&fp=-1&uuid=75aeceef3046d8ce11d354ff89af9517a2e4aa18&osVersion=14.3&d_brand=iPhone&d_model=iPhone9,2&agent=-1&pageClickKey=-1&screen=414*736&platform=3&lang=zh_CN&appid=market-task-h5&_t=1623066557140`,
+    url: `functionId=InviteFriendApiService&body={"method":"changeWxHongBao","data":{"order":2,"channel":1,"token":"","s":""}}&referer=-1&eid=eidIc2ff812158s1ARLLPvIBQjyII7trmiE3BQESzLTXqSC9s3TX28oQv3zQuaY%2B15FedjhWtgYfTsUSkl9FEDNBP8LQRrRx5GwEA93H4jSPYNJ1OvNs&aid=&client=ios&clientVersion=14.3&networkType=wifi&fp=-1&uuid=75aeceef3046d8ce11d354ff89af9517a2e4aa18&osVersion=14.3&d_brand=iPhone&d_model=iPhone9,2&agent=-1&pageClickKey=-1&screen=414*736&platform=3&lang=zh_CN&appid=market-task-h5&_t=1623066557140`,
 
     
 headers: {
